@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite::resource:db/dandanplay.db
+  application:
+    name: dandan-play-server
+#  jpa:
+#    database-platform: org.sqlite.hibernate.dialect.SQLiteDialect
+server:
+  servlet:
+    context-path: /api
+  port: 18080
