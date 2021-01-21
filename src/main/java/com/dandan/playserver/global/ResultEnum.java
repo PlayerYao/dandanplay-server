@@ -23,7 +23,9 @@ public enum ResultEnum {
     UNKNOWN_ERROR(16000,"未知错误"),
     /** 数据格式不符 */
     BODY_NOT_MATCH(12000,"请求的数据格式不符!"),
-    /** 数据格式不符 */
+    /** 数据校验不通过 */
+    DATA_VALIDATE_FAILD(12001,"数据校验不通过"),
+    /** 找不到指定的文件 */
     FILE_NOT_FOUND(13000,"找不到指定的文件!"),
     //身份方面问题
     /** 请求过期 */

@@ -1,8 +1,15 @@
 package com.dandan.playserver.controller;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.dandan.playserver.entity.DdMediaLibrary;
+import com.dandan.playserver.global.ApiResult;
 import com.dandan.playserver.global.CustomException;
+import com.dandan.playserver.global.ResultEnum;
+import com.dandan.playserver.service.IMediaLibraryService;
 import com.dandan.playserver.utils.FileUtil;
+import com.dandan.playserver.vo.DdMediaLibraryVo;
 import com.dandan.playserver.vo.FileResVo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -19,6 +26,11 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/media/library")
 public class MediaLibraryController {
+    private final IMediaLibraryService mediaLibraryService;
+
+    public MediaLibraryController(IMediaLibraryService mediaLibraryService) {
+        this.mediaLibraryService = mediaLibraryService;
+    }
 
     /**
      * 根据路径查询下属文件
@@ -47,4 +59,59 @@ public class MediaLibraryController {
         return files;
     }
 
+    /**
+     * 添加一个媒体库记录
+     *
+     * @param vo 包含name和path的vo
+     * @return com.dandan.playserver.entity.DdMediaLibrary
+     **/
+    @PostMapping
+    public DdMediaLibrary add(DdMediaLibraryVo vo){
+        vo.isValidate();
+        boolean isDir = new File(vo.getPath()).isDirectory();
+        DdMediaLibrary library = new DdMediaLibrary(vo.getName(), vo.getPath(), isDir, true);
+        return mediaLibraryService.save(library);
+    }
+
+    /**
+     * 修改一个媒体库记录
+     *
+     * @param vo 待修改的vo
+     * @return com.dandan.playserver.entity.DdMediaLibrary
+     **/
+    @PutMapping
+    public DdMediaLibrary update(DdMediaLibraryVo vo){
+        vo.isValidate();
+        DdMediaLibrary library = new DdMediaLibrary();
+        BeanUtil.copyProperties(vo,library);
+        return mediaLibraryService.save(library);
+    }
+    /**
+     * 切换启用禁用开关
+     *
+     * @param id 媒体库id
+     * @return com.dandan.playserver.entity.DdMediaLibrary
+     **/
+    @PutMapping("/switch")
+    public DdMediaLibrary switchState(int id){
+        Optional<DdMediaLibrary> optional = mediaLibraryService.getByPrimaryKey(id);
+        return optional.map(mediaLibrary -> {
+            mediaLibrary.setIsEnable(!mediaLibrary.getIsEnable());
+            return mediaLibraryService.save(mediaLibrary);
+        }).orElseThrow(() -> {
+            throw new CustomException(ResultEnum.DATA_VALIDATE_FAILD);
+        });
+    }
+
+    /**
+     * 删除一个媒体库记录
+     *
+     * @param id 被删除的id
+     * @return com.dandan.playserver.global.ApiResult
+     **/
+    @DeleteMapping
+    public ApiResult delete(int id){
+        mediaLibraryService.deleteById(id);
+        return ApiResult.success("删除成功");
+    }
 }
